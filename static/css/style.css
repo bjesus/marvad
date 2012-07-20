@@ -620,3 +620,12 @@ td {
         page-break-after: avoid;
     }
 }
+
+
+.ui-li, .ui-li.ui-field-contain {
+    text-align: right;
+}
+
+.ui-li-heading {
+    white-space:normal;
+}

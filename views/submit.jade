@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  - if (errors)
+    p ישנן שגיאות בפרטים ששלחתם. אנא הזינו מספרים בלבד בשדה הטלפון, ואותיות בלבד בשדות האחרים. הקפידו להזין מספר טלפון מלא.
+  - else
+    p
+      הידעתם? הכי פשוט לפרסם נסיעה באתר
+      a(href="/about") באמצעות SMS!
+  form(action="/", method="POST")
+    ul(data-role="listview", data-theme="d", data-divider-theme="d")
+      li(data-role="fieldcontain")
+        label(for="phone") טלפון
+        input(name="phone", type="number")
+      li(data-role="fieldcontain")
+        fieldset(data-role="controlgroup",data-type="horizontal")
+          legend סוג
+          input(type="radio", name="kind", id="radio-choice-c", value="ride", checked="checked")
+          label(for="radio-choice-c") נסיעה
+          input(type="radio", name="kind", id="radio-choice-d", value="other")
+          label(for="radio-choice-d") שונות
+      li(data-role="fieldcontain")
+        label(for="content") מודעה:
+        textarea(cols="40", rows="8", name="content")
+      li(data-role="fieldcontain")
+        label(for="name") שם
+        input(name="name")
+      li(data-role="fieldcontain")
+        .ui-block-a
+          button(type="submit", data-theme="a")שלח לחמך

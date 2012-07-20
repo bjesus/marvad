@@ -1,4 +1,4 @@
-/* Author: YOUR NAME HERE
+/* Author: Yo'av Moshe
 */
 
 $(document).ready(function() {   
@@ -10,6 +10,10 @@ $(document).ready(function() {
   });
 
   socket.on('server_message', function(data){
-   $('#receiver').append('<li>' + data + '</li>');  
+   $('#rides-list').prepend('<li class="ui-li ui-li-static ui-body-d"><h3 class="ui-li-heading">' +
+   							data.content +
+   							'</h3><p class="ui-li-desc">' +
+   							'לפני שעתיים | ' + data.name + ' | ' + data.phone + ' | ' +
+							'<a data-rel="dialog" href="/remove/' + data.id + '" class="ui-link">מחיקה</a></p></li>').show('slow');  
   });
 });

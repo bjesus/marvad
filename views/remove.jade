@@ -1,0 +1,38 @@
+!!! 5
+//if lt IE 7
+  html.no-js.ie6.oldie(lang='en')
+//if IE 7
+  html.no-js.ie7.oldie(lang='en')
+//if IE 8
+  html.no-js.ie8.oldie(lang='en') 
+//[if gt IE 8]><!
+html.no-js(lang='en', dir='rtl')
+  //<![end if]
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+    title שלח
+    meta(name="description", content="מערכת מגניבה")
+    meta(name="author", content="Yo'av Moshe")
+    meta(name="viewport", content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0')
+    link(rel='stylesheet', href='/css/jquery.mobile-1.1.1.min.css')
+    link(rel='stylesheet', href='/css/style.css')
+
+    //-script(src='js/libs/modernizr-2.0.6.min.js')
+  body
+
+    div(data-role='dialog')
+
+      div(data-role='header')
+        h1 האם להמשיך?
+      div(data-role='content')
+
+        p האם אתם בטוחים שברצונכם למחוק את המודעה "#{item.content}""?
+        p אנא מחקו רק הודעות שכתבתם בעצמכם.
+        p באם תמשיכו, לא ניתן יהיה לשחזר את המודעה.
+
+        
+        form(action="/delete", method="POST")
+          input(type="hidden", name="id", value="#{item.id}")
+          a(href="/", data-rel="back", data-role="button", data-icon="delete", data-inline="true", data-theme="b") ביטול
+          input(data-ajax="false", type="submit", data-icon="check", data-inline="true", value="המשך")

@@ -2,7 +2,7 @@
 var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
-    , port = (process.env.PORT || 8081);
+    , port = (process.env.PORT || 2234);
 
 //Setup Express
 var server = express.createServer();
@@ -11,10 +11,23 @@ server.configure(function(){
     server.set('view options', { layout: false });
     server.use(connect.bodyParser());
     server.use(express.cookieParser());
-    server.use(express.session({ secret: "shhhhhhhhh!"}));
+    server.use(express.session({ secret: "udm3x09242x*marvad"}));
     server.use(connect.static(__dirname + '/static'));
     server.use(server.router);
 });
+
+server.helpers({
+  timeago: require('timeago')
+});
+
+// Monkey-patching
+String.prototype.startsWith = function(prefix) {
+    return this.indexOf(prefix) === 0;
+}
+
+String.prototype.endsWith = function(suffix) {
+    return this.match(suffix+"$") == suffix;
+};
 
 //setup the errors
 server.error(function(err, req, res, next){
@@ -35,7 +48,8 @@ server.error(function(err, req, res, next){
                 },status: 500 });
     }
 });
-server.listen( port);
+server.listen( port );
+
 
 //Setup Socket.IO
 var io = io.listen(server);
@@ -51,6 +65,18 @@ io.sockets.on('connection', function(socket){
 });
 
 
+// Load phone numbers
+var phones = require('./phones.json')
+
+// Initillize DB
+var Sequelize = require("sequelize")
+var sequelize = new Sequelize('database', 'username', 'password', {
+  dialect: 'sqlite',
+  storage: 'database.sqlite'
+})
+var Item = sequelize.import(__dirname + "/Item");
+
+
 ///////////////////////////////////////////
 //              Routes                   //
 ///////////////////////////////////////////
@@ -58,16 +84,99 @@ io.sockets.on('connection', function(socket){
 /////// ADD ALL YOUR ROUTES HERE  /////////
 
 server.get('/', function(req,res){
-  res.render('index.jade', {
-    locals : { 
-              title : 'Your Page Title'
-             ,description: 'Your Page Description'
-             ,author: 'Your Name'
-             ,analyticssiteid: 'XXXXXXX' 
-            }
+  res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+  Item.findAll({order: 'createdAt DESC', offset: 0, limit: 10, where: {kind: 'ride'}}).ok(function(items) {
+    res.render('index.jade', {
+      locals : { rides : items }
+    });
+  }).error(function(err) {
+    res.render('index.jade', {
+      locals : { rides : [] }
+    });
   });
 });
 
+server.get('/others', function(req,res){
+  res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+  Item.findAll({order: 'createdAt DESC', offset: 0, limit: 10, where: {kind: 'other'}}).ok(function(items) {
+    res.render('items.jade', {
+      locals : { items : items }
+    });
+  }).error(function(err) {
+    res.render('items.jade', {
+      locals : { items : [] }
+    });
+  });
+});
+
+server.get('/remove/:id', function(req,res){
+  Item.find(parseInt(req.params.id, 10)).ok(function(item) {
+    res.render('remove.jade', {
+      locals : { item : item}
+    });
+  });
+});
+
+server.post('/delete', function(req,res){
+  Item.find(parseInt(req.body.id, 10)).ok(function(item) {
+    item.destroy().on('ok', function(u) {
+      console.log('deleted item');
+    });
+  });
+  res.redirect('/');
+});
+
+server.get('/about', function(req,res){
+  res.render('about.jade', {
+    locals : { }
+  });
+});
+
+server.get('/submit', function(req,res){
+  res.render('submit.jade', {
+    locals : { errors: null }
+  });
+});
+
+server.post('/', function(req,res){
+  var ride = Item.build({
+    content: req.body.content,
+    name: req.body.name,
+    phone: req.body.phone,
+    kind: req.body.kind
+  })
+  errors = ride.validate();
+  if (errors) {
+    res.render('submit.jade', {
+      locals : { errors: errors }
+    });
+  } else {
+    ride.save().ok(function(ride) {
+      io.sockets.emit('server_message', ride.values);
+        Item.findAll({order: 'createdAt DESC', offset: 0, limit: 10, where: {kind: 'ride'}}).ok(function(items) {
+          res.render('index.jade', {
+            locals : { rides : items }
+          });
+        });
+    });
+  }
+});
+
+server.get('/submit_sms', function(req,res){
+  if ( req.query.text.startsWith('רכב:') == true ) {
+    var name = phones[req.query.phone.slice(4)];
+    var phone = '0'+req.query.phone.slice(4);
+    var ride = Item.create({
+      content: req.query.text.slice(4),
+      phone: phone,
+      name: name,
+      kind: 'ride'
+    }).ok(function(ride) {
+      io.sockets.emit('server_message', ride.values);
+      res.send('thanks');
+    });
+  };
+});
 
 //A Route for Creating a 500 Error (Useful to keep around)
 server.get('/500', function(req, res){
@@ -86,4 +195,4 @@ function NotFound(msg){
 }
 
 
-console.log('Listening on http://0.0.0.0:' + port );
+console.log('Marvad started on http://0.0.0.0:' + port );

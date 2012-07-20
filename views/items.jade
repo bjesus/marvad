@@ -2,7 +2,7 @@ extends layout
 
 block content
   ul(data-role="listview", data-theme="d", data-divider-theme="c", id="rides-list")
-    each ride in rides
+    each ride in items
       li
         h3= ride.content
         p
