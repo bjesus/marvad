@@ -1,13 +1,13 @@
 extends layout
 
 block content
-  - if (errors)
-    p ישנן שגיאות בפרטים ששלחתם. אנא הזינו מספרים בלבד בשדה הטלפון, ואותיות בלבד בשדות האחרים. הקפידו להזין מספר טלפון מלא.
-  - else
-    p
-      הידעתם? הכי פשוט לפרסם נסיעה באתר
-      a(href="/about") באמצעות SMS!
   form(action="/", method="POST")
+    - if (errors)
+      p ישנן שגיאות בפרטים ששלחתם. אנא הזינו מספרים בלבד בשדה הטלפון, ואותיות בלבד בשדות האחרים. הקפידו להזין מספר טלפון מלא.
+    - else
+      p
+        הידעתם? הכי פשוט לפרסם נסיעה באתר
+        a(href="/about") באמצעות SMS!
     ul(data-role="listview", data-theme="d", data-divider-theme="d")
       li(data-role="fieldcontain")
         label(for="phone") טלפון
@@ -21,10 +21,10 @@ block content
           label(for="radio-choice-d") שונות
       li(data-role="fieldcontain")
         label(for="content") מודעה:
-        textarea(cols="40", rows="8", name="content")
+        textarea(cols="40", rows="2", name="content")
       li(data-role="fieldcontain")
         label(for="name") שם
         input(name="name")
       li(data-role="fieldcontain")
         .ui-block-a
-          button(type="submit", data-theme="a")שלח לחמך
+          input(type="submit", data-theme="a", data-icon="check", data-inline="true", value="שלח לחמך")
