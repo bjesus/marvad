@@ -20,6 +20,29 @@ server.helpers({
   timeago: require('timeago')
 });
 
+server.dynamicHelpers({
+  capable_client: function (req, res) {
+      var capable_client = false;
+      var ua = req.headers['user-agent'];
+      if ( ua.indexOf("Android") > 0  ||
+           ua.indexOf("Firefox") > 0 ||
+           ua.indexOf("like Mac OS X") > 0 ||
+           ua.indexOf("Chrome") > 0 ||
+           ua.indexOf("BlackBerry") > 0 ||
+           ua.indexOf("MSIE 7") > 0 ||
+           ua.indexOf("MSIE 8") > 0 ||
+           ua.indexOf("MSIE 9") > 0 ||
+           ua.indexOf("MSIE 10") > 0 ||
+           ua.indexOf("Windows Phone" > 0)) {
+        capable_client = true;
+      }
+      return capable_client;
+  }, menu: function (req, res) {
+      return req.url.slice(1);
+  }
+});
+
+
 // Monkey-patching
 String.prototype.startsWith = function(prefix) {
     return this.indexOf(prefix) === 0;
