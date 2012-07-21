@@ -26,7 +26,7 @@ hgroup,
 nav,
 section,
 summary {
-    display: block;
+    display: block
 }
 
 audio,
@@ -628,4 +628,12 @@ td {
 
 .ui-li-heading {
     white-space:normal;
+}
+
+.ui-block-a, .ui-block-b, .ui-block-c, .ui-block-d, .ui-block-e {
+    float: right;
+}
+
+.ui-field-contain .ui-btn.ui-submit {
+    width: 100%;
 }
