@@ -185,18 +185,20 @@ server.post('/', function(req,res){
   }
 });
 
-server.get('/submit_sms', function(req,res){
-  if ( req.query.text.startsWith('רכב:') == true ) {
-    var name = phones[req.query.phone.slice(4)];
-    var phone = '0'+req.query.phone.slice(4);
+server.post('/submit_sms', function(req,res){
+  console.log(req.body);
+  console.log(req.body.message);
+  if ( req.body.message.startsWith('רכב:') == true ) {
+    var name = phones[req.body.from.slice(4)];
+    var phone = '0'+req.body.from.slice(4);
     var ride = Item.create({
-      content: req.query.text.slice(4),
+      content: req.body.message.slice(4),
       phone: phone,
       name: name,
       kind: 'ride'
     }).ok(function(ride) {
       io.sockets.emit('server_message', ride.values);
-      res.send('thanks');
+      res.send('{ "payload": { "success": "true", "task": "send", "messages": [ { "to": "'+ req.body.from +'", "message": "מרבד הקסמים קיבל את הודעתך. תודה!" }] }}');
     });
   };
 });
