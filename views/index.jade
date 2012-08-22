@@ -1,12 +1,47 @@
 extends layout
 
 block content
+  h2 נסיעות היום
   ul(data-role="listview", data-theme="d", data-divider-theme="c", id="rides-list")
-    each ride in rides
+    each ride in today
       li
-        h3= ride.content
+        h3
+          #{ride.time.getHours()}:#{ride.time.getMinutes()} |
+          #{ride.content}
         p
-          #{timeago(ride.createdAt)} |
+          #{ride.name} |
+          #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
+          a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
+  h2 נסיעות מחר
+  ul
+    each ride in tomorrow
+      li
+        h3
+          #{ride.time.getHours()}:#{ride.time.getMinutes()} |
+          #{ride.content}
+        p
+          #{ride.name} |
+          #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
+          a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
+  h2 נסיעות מחרתיים
+  ul
+    each ride in tomorrowow
+      li
+        h3
+          #{ride.time.getHours()}:#{ride.time.getMinutes()} |
+          #{ride.content}
+        p
+          #{ride.name} |
+          #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
+          a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
+  h2 נסיעות אחרתיים
+  ul
+    each ride in tomorrowowow
+      li
+        h3
+          #{ride.time.getHours()}:#{ride.time.getMinutes()} |
+          #{ride.content}
+        p
           #{ride.name} |
           #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
           a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה

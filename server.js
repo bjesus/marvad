@@ -99,6 +99,8 @@ var sequelize = new Sequelize('database', 'username', 'password', {
 })
 var Item = sequelize.import(__dirname + "/Item");
 
+// Restart DB
+// Item.sync({force: true})
 
 ///////////////////////////////////////////
 //              Routes                   //
@@ -106,22 +108,23 @@ var Item = sequelize.import(__dirname + "/Item");
 
 /////// ADD ALL YOUR ROUTES HERE  /////////
 
-server.get('/', function(req,res){
-  res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-  Item.findAll({order: 'createdAt DESC', offset: 0, limit: 10, where: {kind: 'ride'}}).ok(function(items) {
-    res.render('index.jade', {
-      locals : { rides : items }
-    });
-  }).error(function(err) {
-    res.render('index.jade', {
-      locals : { rides : [] }
+server.get('/', function(req,res){  
+  Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now') AND time < DATE('now', '+1 days')"]}).ok(function(today_items) {
+    Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+1 days') AND time < DATE('now', '+2 days')"]}).ok(function(tomorrow_items) {
+      Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+2 days') AND time < DATE('now', '+3 days')"]}).ok(function(tomorrowow_items) {
+        Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+3 days') AND time < DATE('now', '+4 days')"]}).ok(function(tomorrowowow_items) {
+          res.render('index.jade', {
+            locals : { today : today_items, tomorrow : tomorrow_items, tomorrowow : tomorrowow_items, tomorrowowow : tomorrowowow_items }
+          });
+        });
+      });
     });
   });
 });
 
+/*
 server.get('/others', function(req,res){
-  res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-  Item.findAll({order: 'createdAt DESC', offset: 0, limit: 10, where: {kind: 'other'}}).ok(function(items) {
+  Item.findAll({order: 'time DESC', offset: 0, limit: 10, where: {kind: 'other'}}).ok(function(items) {
     res.render('items.jade', {
       locals : { items : items }
     });
@@ -131,6 +134,7 @@ server.get('/others', function(req,res){
     });
   });
 });
+*/
 
 server.get('/remove/:id', function(req,res){
   Item.find(parseInt(req.params.id, 10)).ok(function(item) {
@@ -162,25 +166,33 @@ server.get('/submit', function(req,res){
 });
 
 server.post('/', function(req,res){
+
+  current = new Date()
+  rideTime = new Date(current.getFullYear(),
+              current.getMonth(),
+              current.getDate()+parseInt(req.body.daysfromnow),
+              parseInt(req.body.time.split(':')[0]),
+              parseInt(req.body.time.split(':')[1]),
+              0,
+              0);
+
   var ride = Item.build({
     content: req.body.content,
     name: req.body.name,
     phone: req.body.phone,
-    kind: req.body.kind
+    kind: req.body.kind,
+    time: rideTime,
   })
   errors = ride.validate();
   if (errors) {
+    console.log(errors)
     res.render('submit.jade', {
       locals : { errors: errors }
     });
   } else {
     ride.save().ok(function(ride) {
       io.sockets.emit('server_message', ride.values);
-        Item.findAll({order: 'createdAt DESC', offset: 0, limit: 10, where: {kind: 'ride'}}).ok(function(items) {
-          res.render('index.jade', {
-            locals : { rides : items }
-          });
-        });
+      res.redirect('/');
     });
   }
 });

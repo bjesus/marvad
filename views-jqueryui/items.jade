@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  ul(data-role="listview", data-theme="d", data-divider-theme="c", id="rides-list")
+    each ride in items
+      li
+        h3= ride.content
+        p
+          #{timeago(ride.createdAt)} |
+          #{ride.name} |
+          #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
+          a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה

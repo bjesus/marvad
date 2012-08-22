@@ -5,26 +5,51 @@ block content
     - if (errors)
       p ישנן שגיאות בפרטים ששלחתם. אנא הזינו מספרים בלבד בשדה הטלפון, ואותיות בלבד בשדות האחרים. הקפידו להזין מספר טלפון מלא.
     - else
-      p
-        הידעתם? הכי פשוט לפרסם נסיעה באתר
-        a(href="/about") באמצעות SMS!
-    ul(data-role="listview", data-theme="d", data-divider-theme="d")
-      li(data-role="fieldcontain")
-        label(for="phone") טלפון
-        input(name="phone", type="number")
-      li(data-role="fieldcontain")
-        fieldset(data-role="controlgroup",data-type="horizontal")
-          legend סוג
-          input(type="radio", name="kind", id="radio-choice-c", value="ride", checked="checked")
-          label(for="radio-choice-c") נסיעה
-          input(type="radio", name="kind", id="radio-choice-d", value="other")
-          label(for="radio-choice-d") שונות
-      li(data-role="fieldcontain")
-        label(for="content") מודעה:
-        textarea(cols="40", rows="2", name="content")
-      li(data-role="fieldcontain")
-        label(for="name") שם
-        input(name="name")
-      li(data-role="fieldcontain")
-        .ui-block-a
-          input(type="submit", data-theme="a", data-icon="check", data-inline="true", value="שלח לחמך")
+
+      //-
+        p
+          הידעתם? הכי פשוט לפרסם נסיעה באתר
+          a(href="/about") באמצעות SMS!
+
+      label(for="phone") טלפון (כולל קידומת, ללא מקף)
+      br
+      input(name="phone", type="number")
+      br
+      br
+      //-
+        legend יציאה מאזור
+        input(type="radio", name="area", value="north", checked="checked")
+        label(for="radio-choice-c") צפון
+        input(type="radio", name="area", value="center")
+        label(for="radio-choice-d") מרכז
+        input(type="radio", name="area", value="south")
+        label(for="radio-choice-d") דרום
+      legend מועד הנסיעה
+      input(type="radio", name="daysfromnow", value="0", checked="checked")
+      label(for="radio-choice-c") היום
+      input(type="radio", name="daysfromnow", value="1")
+      label(for="radio-choice-d") מחר
+      input(type="radio", name="daysfromnow", value="2")
+      label(for="radio-choice-d") מחרתיים
+      input(type="radio", name="daysfromnow", value="3")
+      label(for="radio-choice-d") מחרתיים+1
+      br
+      br
+
+      label(for="content") שעת יציאה (בתבנית 16:45)
+      br
+      input(type="text", name="time")
+            
+      br
+
+      label(for="content") מודעה
+      br
+      textarea(cols="40", rows="2", name="content")
+      br
+
+      label(for="name") שם
+      br
+      input(name="name")
+
+      .ui-block-a
+        input(type="submit", data-theme="a", data-icon="check", data-inline="true", value="שלח לחמך")
