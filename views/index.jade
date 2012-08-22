@@ -6,7 +6,7 @@ block content
     each ride in today
       li
         h3
-          #{ride.time.getHours()}:#{ride.time.getMinutes()} |
+          #{ride.time.getHours()}:#{(ride.time.getMinutes()<10?'0':'') + ride.time.getMinutes()} |
           #{ride.content}
         p
           #{ride.name} |
@@ -17,7 +17,7 @@ block content
     each ride in tomorrow
       li
         h3
-          #{ride.time.getHours()}:#{ride.time.getMinutes()} |
+          #{ride.time.getHours()}:#{(ride.time.getMinutes()<10?'0':'') + ride.time.getMinutes()} |
           #{ride.content}
         p
           #{ride.name} |
@@ -28,7 +28,7 @@ block content
     each ride in tomorrowow
       li
         h3
-          #{ride.time.getHours()}:#{ride.time.getMinutes()} |
+          #{ride.time.getHours()}:#{(ride.time.getMinutes()<10?'0':'') + ride.time.getMinutes()} |
           #{ride.content}
         p
           #{ride.name} |
@@ -39,7 +39,7 @@ block content
     each ride in tomorrowowow
       li
         h3
-          #{ride.time.getHours()}:#{ride.time.getMinutes()} |
+          #{ride.time.getHours()}:#{(ride.time.getMinutes()<10?'0':'') + ride.time.getMinutes()} |
           #{ride.content}
         p
           #{ride.name} |
