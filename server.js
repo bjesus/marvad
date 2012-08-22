@@ -109,10 +109,10 @@ var Item = sequelize.import(__dirname + "/Item");
 /////// ADD ALL YOUR ROUTES HERE  /////////
 
 server.get('/', function(req,res){  
-  Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now') AND time < DATE('now', '+1 days')"]}).ok(function(today_items) {
-    Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+1 days') AND time < DATE('now', '+2 days')"]}).ok(function(tomorrow_items) {
-      Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+2 days') AND time < DATE('now', '+3 days')"]}).ok(function(tomorrowow_items) {
-        Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+3 days') AND time < DATE('now', '+4 days')"]}).ok(function(tomorrowowow_items) {
+  Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATETIME('now', '-2 hours', 'localtime') AND time < DATE('now', '+1 days', 'localtime')"]}).ok(function(today_items) {
+    Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+1 days', 'localtime') AND time < DATE('now', '+2 days', 'localtime')"]}).ok(function(tomorrow_items) {
+      Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+2 days', 'localtime') AND time < DATE('now', '+3 days', 'localtime')"]}).ok(function(tomorrowow_items) {
+        Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+3 days', 'localtime') AND time < DATE('now', '+4 days', 'localtime')"]}).ok(function(tomorrowowow_items) {
           res.render('index.jade', {
             locals : { today : today_items, tomorrow : tomorrow_items, tomorrowow : tomorrowow_items, tomorrowowow : tomorrowowow_items }
           });
