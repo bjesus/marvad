@@ -10,7 +10,8 @@ block content
           #{ride.content}
         p
           #{ride.name} |
-          #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
+          a(href="tel:+972#{ride.phone.slice(1)}") #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)}
+          &nbsp;&#124; 
           a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
   h2 נסיעות מחר - #{weekday[day+1]}
   ul
@@ -21,7 +22,8 @@ block content
           #{ride.content}
         p
           #{ride.name} |
-          #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
+          a(href="tel:+972#{ride.phone.slice(1)}") #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)}
+          &nbsp;&#124; 
           a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
   h2 נסיעות מחרתיים - #{weekday[day+2]}
   ul
@@ -32,7 +34,8 @@ block content
           #{ride.content}
         p
           #{ride.name} |
-          #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
+          a(href="tel:+972#{ride.phone.slice(1)}") #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)}
+          &nbsp;&#124; 
           a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
   h2 נסיעות אחרתיים - #{weekday[day+3]}
   ul
@@ -43,5 +46,6 @@ block content
           #{ride.content}
         p
           #{ride.name} |
-          #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
+          a(href="tel:+972#{ride.phone.slice(1)}") #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)}
+          &nbsp;&#124; 
           a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
