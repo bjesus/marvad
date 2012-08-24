@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  h2 נסיעות היום
+  h2 נסיעות היום - #{weekday[day]}
   ul(data-role="listview", data-theme="d", data-divider-theme="c", id="rides-list")
     each ride in today
       li
@@ -12,7 +12,7 @@ block content
           #{ride.name} |
           #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
           a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
-  h2 נסיעות מחר
+  h2 נסיעות מחר - #{weekday[day+1]}
   ul
     each ride in tomorrow
       li
@@ -23,7 +23,7 @@ block content
           #{ride.name} |
           #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
           a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
-  h2 נסיעות מחרתיים
+  h2 נסיעות מחרתיים - #{weekday[day+2]}
   ul
     each ride in tomorrowow
       li
@@ -34,7 +34,7 @@ block content
           #{ride.name} |
           #{ride.phone.slice(0,3)}-#{ride.phone.slice(3,6)}-#{ride.phone.slice(6)} | 
           a(href='/remove/#{ride.id}', data-rel="dialog") מחיקה
-  h2 נסיעות אחרתיים
+  h2 נסיעות אחרתיים - #{weekday[day+3]}
   ul
     each ride in tomorrowowow
       li

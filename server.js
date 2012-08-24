@@ -16,10 +16,6 @@ server.configure(function(){
     server.use(server.router);
 });
 
-server.helpers({
-  timeago: require('timeago')
-});
-
 server.dynamicHelpers({
   capable_client: function (req, res) {
       var capable_client = false;
@@ -113,8 +109,22 @@ server.get('/', function(req,res){
     Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+1 days', 'localtime') AND time < DATE('now', '+2 days', 'localtime')"]}).ok(function(tomorrow_items) {
       Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+2 days', 'localtime') AND time < DATE('now', '+3 days', 'localtime')"]}).ok(function(tomorrowow_items) {
         Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+3 days', 'localtime') AND time < DATE('now', '+4 days', 'localtime')"]}).ok(function(tomorrowowow_items) {
+
+          var weekday=new Array(7);
+          weekday[0]="ראשון";
+          weekday[1]="שני";
+          weekday[2]="שלישי";
+          weekday[3]="רביעי";
+          weekday[4]="חמישי";
+          weekday[5]="שישי";
+          weekday[6]="שבת מנוחה";
+
+          weekday = weekday.concat(weekday);
+
+          var d=new Date();
+          d = d.getDay();
           res.render('index.jade', {
-            locals : { today : today_items, tomorrow : tomorrow_items, tomorrowow : tomorrowow_items, tomorrowowow : tomorrowowow_items }
+            locals : { today : today_items, tomorrow : tomorrow_items, tomorrowow : tomorrowow_items, tomorrowowow : tomorrowowow_items, weekday: weekday, day: d }
           });
         });
       });
@@ -171,8 +181,8 @@ server.post('/', function(req,res){
   rideTime = new Date(current.getFullYear(),
               current.getMonth(),
               current.getDate()+parseInt(req.body.daysfromnow),
-              parseInt(req.body.time.split(':')[0]),
-              parseInt(req.body.time.split(':')[1]),
+              parseInt(req.body.time.split(':')[0], 10),
+              parseInt(req.body.time.split(':')[1], 10),
               0,
               0);
 
