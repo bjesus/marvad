@@ -17,6 +17,7 @@ html.no-js(lang='en', dir='rtl')
     link(rel="apple-touch-icon", href="/marvad.png")
     link(rel="apple-touch-icon-precomposed", href="/marvad.png")
     meta(name="description", content="מערכת מגניבה")
+    meta(http-equiv="Refresh", content='120; URL=/')
     meta(name="author", content="Yo'av Moshe")
     meta(name="viewport", content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0')
   body
@@ -35,7 +36,7 @@ html.no-js(lang='en', dir='rtl')
   div(id='footer')
     footer
       a(href="/about", class=(menu === 'about' ? 'ui-btn-active' : '')) אודות
-      - if (capable_client)
+      //- if (capable_client)
         script(defer, src='/socket.io/socket.io.js')
       script
         var _gaq=[['_setAccount','UA-6887067-8'],['_trackPageview'],['_trackPageLoadTime']];
