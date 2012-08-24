@@ -26,9 +26,10 @@ html.no-js(lang='en', dir='rtl')
       ul
         li
           a(href="/submit", class=(menu === 'submit' ? 'ui-btn-active' : '')) פרסום נסיעה
-        //-
-          li
-            a(href="/about", class=(menu === 'about' ? 'ui-btn-active' : '')) הוראות
+        li
+          קראתם כבר את דף
+          a(href="/about", class=(menu === 'about' ? 'ui-btn-active' : ''))ההסברים
+          ?
   div(id='content')
     block content
   div(id='footer')
