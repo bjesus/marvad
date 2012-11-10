@@ -104,7 +104,32 @@ var Item = sequelize.import(__dirname + "/Item");
 
 /////// ADD ALL YOUR ROUTES HERE  /////////
 
-server.get('/', function(req,res){  
+server.get('/logout', function(req,res) {
+    res.cookie('code', "", { maxAge: 1, path: '/' });
+    res.redirect("/");
+});
+
+server.get('/login', function(req,res) {
+  res.render('login.jade', {
+    errors: false,
+  });
+});
+
+server.post('/login', function(req,res) {
+  if (req.body.pass === "6563") {
+    res.cookie('code', "codecomeshere", { maxAge: 3600000, path: '/' });
+    res.redirect('/');
+  } else {
+    res.render('login.jade', {
+      errors: true,
+    });    
+  }
+});
+
+server.get('/', function(req,res){
+  if ( req.cookies.code !== "codecomeshere" ){
+    res.redirect('/login');
+  }
   Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATETIME('now', '-2 hours', 'localtime') AND time < DATE('now', '+1 days', 'localtime')"]}).ok(function(today_items) {
     Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+1 days', 'localtime') AND time < DATE('now', '+2 days', 'localtime')"]}).ok(function(tomorrow_items) {
       Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+2 days', 'localtime') AND time < DATE('now', '+3 days', 'localtime')"]}).ok(function(tomorrowow_items) {

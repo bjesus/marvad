@@ -23,21 +23,29 @@ html.no-js(lang='en', dir='rtl')
   body
     h1
       a(href="/", class=(menu === '' ? 'ui-btn-active' : '')) מרבד הקסמים
-    div(id='navbar')
-      ul
-        li
-          a(href="/submit", class=(menu === 'submit' ? 'ui-btn-active' : '')) פרסום נסיעה
-        li
-          קראתם כבר את דף
-          a(href="/about", class=(menu === 'about' ? 'ui-btn-active' : ''))ההסברים
-          ?
+    block navbar
+      div(id='navbar')
+        ul
+          li
+            a(href="/submit", class=(menu === 'submit' ? 'ui-btn-active' : '')) פרסום נסיעה
+          li
+            קראתם כבר את דף
+            a(href="/about", class=(menu === 'about' ? 'ui-btn-active' : ''))ההסברים
+            ?
   div(id='content')
     block content
   div(id='footer')
     footer
-      a(href="/about", class=(menu === 'about' ? 'ui-btn-active' : '')) אודות
-      //- if (capable_client)
-        script(defer, src='/socket.io/socket.io.js')
+      block footer
+        a(href="/about", class=(menu === 'about' ? 'ui-btn-active' : '')) אודות מרבד הקסמים
+        br
+        a(href="http://games.noal.co.il", class=(menu === 'games' ? 'ui-btn-active' : '')) גשש משחקים
+        |  | 
+        a(href="http://144.noal.co.il", class=(menu === 'balash' ? 'ui-btn-active' : '')) גשש בלש
+        |  | 
+        a(href="http://2800.noal.org.il", class=(menu === 'bus' ? 'ui-btn-active' : '')) גששובוס
+        br
+        a(href="/logout", class=(menu === 'logout' ? 'ui-btn-active' : '')) ניתוק
       script
         var _gaq=[['_setAccount','UA-6887067-8'],['_trackPageview'],['_trackPageLoadTime']];
         (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;

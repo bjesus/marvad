@@ -1,0 +1,16 @@
+extends layout
+
+block navbar
+
+block content
+  form(action="/login", method="POST")
+    - if (errors)
+      p שגיאה בהזנת הסיסמה
+      p רוצה לנסות שוב?
+    - else
+      p עצרי!! מה הסיסמה?
+    input(type="text", name="pass")
+    input(type="submit", value="חיבור אחיד", name="submit")
+    p מערכת חיבור אחיד תחבר אותך בסיסמה אחת לכל המערכות
+
+block footer
