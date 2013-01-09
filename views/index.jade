@@ -1,6 +1,19 @@
 extends layout
 
 block content
+  h2 המרבד במייל
+  p כל הזמן נכנסים ומתאכזבים? הרשמו להתראות מייל ולא תפסידו אף נסיעה!
+  form(action="/add_email", method="post")
+    label(for="useremail") כתובת דוא"ל: 
+    input(type="email", required="required", name="useremail", id="useremail")
+    br
+    input(type="radio", name="when", id="emailpost", value="post", checked="checked")
+    label(for="emailpost") כל פרסום (אין הרבה! מומלץ) 
+    br
+    input(type="radio", name="when", id="emailday", value="day")
+    label(for="emailday") סיכום של היום (תפספסו פרסומים של מעכשו לעכשו)
+    br
+    input(type="submit", value="דונט קול אס - וויל קול יו")
   h2 נסיעות היום - #{weekday[day]}
   ul(data-role="listview", data-theme="d", data-divider-theme="c", id="rides-list")
     each ride in today

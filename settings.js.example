@@ -1,0 +1,13 @@
+var settings = {}
+
+settings.cookie = {};
+settings.cookie.pass = "somepass";
+settings.cookie.domain = "/";
+settings.domain = "localhost:2234"
+
+settings.smtp = {};
+settings.smtp.user = "username";
+settings.smtp.password = "password";
+settings.smtp.server = "smtp.gmail.com";
+
+module.exports = settings;

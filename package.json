@@ -1,7 +1,7 @@
 {
   "name": "Marvad",
-  "description": "Marvad - ride sharing system",
-  "author": "Yo'av Moshe <your@emailaddress.com>",
+  "description": "Marvad - small carpooling system",
+  "author": "bjesus",
   "version": "1.0.3",
   "dependencies": {
     "connect": "1.8.5",

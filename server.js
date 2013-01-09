@@ -2,7 +2,8 @@
 var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
-    , port = (process.env.PORT || 2234);
+    , port = (process.env.PORT || 2234)
+    , settings = require('./settings');
 
 //Setup Express
 var server = express.createServer();
@@ -15,6 +16,59 @@ server.configure(function(){
     server.use(connect.static(__dirname + '/static'));
     server.use(server.router);
 });
+
+var email   = require("emailjs/email");
+var smtpserver  = email.server.connect({
+   user:    settings.smtp.user, 
+   password:settings.smtp.password, 
+   host:    settings.smtp.server, 
+   ssl:     true
+});
+
+
+var cronJob = require('cron').CronJob;
+new cronJob('00 30 21 * * *', function(){
+  console.log('Crontab');
+
+  Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATETIME('now', '-2 hours', 'localtime')"]}).ok(function(items) {
+    if (items.length > 0) {
+      var html_data = "";
+      for (var i=0;i<items.length;i++) {
+        items[i]
+        var time = items[i].time.getDate()+"/"+(items[i].time.getMonth()+1)+" "+items[i].time.getHours()+':'+(items[i].time.getMinutes()<10?'0':'') + items[i].time.getMinutes();
+        var data = "<li><strong>" + time + "</strong> - " +  items[i].content + "</li>"
+        html_data = html_data+data
+      };
+      Subscriber.findAll({ where: {freq: 'day'}}).ok(function(subscribers) {
+        for (var i=0;i<subscribers.length;i++) {
+          submit = "http://"+settings.domain+"/submit"
+          unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer("bjesus@gmail.com").toString('base64')
+
+          var message = {
+             text:    "HTML content", 
+             from:    "מרבד הקסמים <noreply@"+settings.domain+">", 
+             to:      subscribers[i].email,
+             subject: "נסיעות עתידיות במרבד",
+             attachment: 
+             [
+                {data: '<html><div dir="rtl" style="direction: rtl; text-align: right;">' +
+                  '<h1>נסיעות קסומות במרבד</h1>' +
+                  html_data +
+                  '<br/>דואר זה נשלח אליכם על כנפיו של <a href="http://'+settings.domain+
+                  '">מרבד הקסמים</a>.<br/>נוסעים לאנשהו? <a href="'+submit+
+                  '">פרסמו גם אתם וספרד דה לאב!</a><br/><br/>--<br/>להפסיק לקבל התראות? <a href="'+unsubscribe+
+                  '">לחצו כאן</a>' +
+                  '</div></html>', alternative:true}
+             ]
+          };
+
+          // send the message and get a callback with an error or details of the message that was sent
+          smtpserver.send(message, function(err, message) { console.log(err || message); });
+        };
+      });
+    };
+  });
+}, null, true);
 
 server.dynamicHelpers({
   capable_client: function (req, res) {
@@ -94,9 +148,11 @@ var sequelize = new Sequelize('database', 'username', 'password', {
   storage: 'database.sqlite'
 })
 var Item = sequelize.import(__dirname + "/Item");
+var Subscriber = sequelize.import(__dirname + "/Subscriber");
 
 // Restart DB
 // Item.sync({force: true})
+// Subscriber.sync({force: true})
 
 ///////////////////////////////////////////
 //              Routes                   //
@@ -105,7 +161,7 @@ var Item = sequelize.import(__dirname + "/Item");
 /////// ADD ALL YOUR ROUTES HERE  /////////
 
 server.get('/logout', function(req,res) {
-    res.cookie('code', "", { maxAge: 1, path: '/' });
+    res.cookie('code', "", { maxAge: 1, path: settings.cookie.domain });
     res.redirect("/");
 });
 
@@ -115,9 +171,37 @@ server.get('/login', function(req,res) {
   });
 });
 
+server.post('/add_email', function(req,res) {
+  Subscriber.find({ where: {email: req.body.useremail} }).ok(function(subscriber) {
+    if (subscriber !== null) {
+      subscriber.destroy().on('ok', function(u) {
+        console.log('deleted subscriber');
+      });
+    }
+
+    var subscriber = Subscriber.build({
+      email: req.body.useremail,
+      freq: req.body.when,
+    });
+    errors = subscriber.validate();
+    if (errors) {
+      res.render('message.jade', {
+        locals : { message: errors }
+      });
+    } else {
+      subscriber.save().ok(function(subscriber) {
+        res.render('message.jade', {
+          locals : { message: "המייל נקלט במערכת. נהיה בקשר!" }
+        });
+      });
+    }
+
+  });
+});
+
 server.post('/login', function(req,res) {
-  if (req.body.pass === "6563") {
-    res.cookie('code', "codecomeshere", { maxAge: 3600000, path: '/' });
+  if (req.body.pass === settings.cookie.pass) {
+    res.cookie('code', settings.cookie.pass, { maxAge: 3600000, path: settings.cookie.domain });
     res.redirect('/');
   } else {
     res.render('login.jade', {
@@ -127,9 +211,10 @@ server.post('/login', function(req,res) {
 });
 
 server.get('/', function(req,res){
-  if ( req.cookies.code !== "codecomeshere" ){
+  if ( req.cookies.code !== settings.cookie.pass ){
     res.redirect('/login');
   }
+  Subscriber.findAll().ok(function(subs) { console.log(subs) });
   Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATETIME('now', '-2 hours', 'localtime') AND time < DATE('now', '+1 days', 'localtime')"]}).ok(function(today_items) {
     Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+1 days', 'localtime') AND time < DATE('now', '+2 days', 'localtime')"]}).ok(function(tomorrow_items) {
       Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+2 days', 'localtime') AND time < DATE('now', '+3 days', 'localtime')"]}).ok(function(tomorrowow_items) {
@@ -201,7 +286,6 @@ server.get('/submit', function(req,res){
 });
 
 server.post('/', function(req,res){
-
   current = new Date()
   rideTime = new Date(current.getFullYear(),
               current.getMonth(),
@@ -210,7 +294,6 @@ server.post('/', function(req,res){
               parseInt(req.body.time.split(':')[1], 10),
               0,
               0);
-
   var ride = Item.build({
     content: req.body.content,
     name: req.body.name,
@@ -227,9 +310,47 @@ server.post('/', function(req,res){
   } else {
     ride.save().ok(function(ride) {
       io.sockets.emit('server_message', ride.values);
+
+      submit = "http://"+settings.domain+"/submit"
+      unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer("bjesus@gmail.com").toString('base64')
+      day = {"0": "היום", "1": "מחר", "2": "מחרתיים", "3": "אחרתיים"}
+      time = ride.time.getDate()+"/"+(ride.time.getMonth()+1)+" "+ride.time.getHours()+':'+(ride.time.getMinutes()<10?'0':'') + ride.time.getMinutes();
+
+      Subscriber.findAll({ where: {freq: 'post'}}).ok(function(subscribers) {
+        for (var i=0;i<subscribers.length;i++)
+        {
+          smtpserver.send({
+             text:    "פרסום חדש במרבד!\n\nמאת: "+
+                      ride.name +
+                      "\nמועד: " + day[req.body.daysfromnow] + " " + time +
+                      "\nתוכן: " + ride.content +
+                      "\n\nדואר זה נשלח אליכם על כנפיו של מרבד הקסמים.\nhttp://"+settings.domain+
+                      "\n\nנוסעים לאנשהו? פרסמו גם אתם וספרד דה לאב!\n"+submit+
+                      "\n\n--\nלהפסיק לקבל התראות? לחצו כאן: \n "+unsubscribe, 
+             from:    "מרבד הקסמים <noreply@"+settings.domain+">", 
+             to:      subscribers[i].email,
+             subject: "נסיעה: " + day[req.body.daysfromnow] + " " + time + " - " + ride.content
+          }, function(err, message) { console.log(err || message); });
+        }
+      });
+      
       res.redirect('/');
     });
   }
+});
+
+server.get('/remove_email', function(req, res){
+    email = new Buffer(req.query.id, 'base64').toString('ascii');
+    Subscriber.find({ where: {email: email} }).ok(function(subscriber) {
+      if (subscriber !== null) {
+        subscriber.destroy().on('ok', function(u) {
+          console.log('deleted subscriber');
+        });
+      }
+    });
+    res.render('message.jade', {
+      locals : { message: "לא תקבלו עוד עדכונים. חבל" }
+    });
 });
 
 server.post('/submit_sms', function(req,res){
