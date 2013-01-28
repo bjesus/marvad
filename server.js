@@ -160,7 +160,7 @@ var Subscriber = sequelize.import(__dirname + "/Subscriber");
 /////// ADD ALL YOUR ROUTES HERE  /////////
 
 server.get('/logout', function(req,res) {
-    res.cookie('code', "", { maxAge: 1, path: settings.cookie.domain });
+    res.cookie('pass', '', { domain: settings.cookie.domain });
     res.redirect("/");
 });
 
@@ -200,7 +200,7 @@ server.post('/add_email', function(req,res) {
 
 server.post('/login', function(req,res) {
   if (req.body.pass === settings.cookie.pass) {
-    res.cookie('code', settings.cookie.pass, { maxAge: 3600000, path: settings.cookie.domain });
+    res.cookie('pass', settings.cookie.pass, { maxAge: 3600000, domain: settings.cookie.domain });
     res.redirect('/');
   } else {
     res.render('login.jade', {
@@ -210,7 +210,7 @@ server.post('/login', function(req,res) {
 });
 
 server.get('/', function(req,res){
-  if ( req.cookies.code !== settings.cookie.pass ){
+  if ( req.cookies.pass !== settings.cookie.pass ){
     res.redirect('/login');
   }
   Subscriber.findAll().ok(function(subs) { console.log(subs) });
