@@ -42,8 +42,7 @@ new cronJob('00 30 21 * * *', function(){
       Subscriber.findAll({ where: {freq: 'day'}}).ok(function(subscribers) {
         for (var i=0;i<subscribers.length;i++) {
           submit = "http://"+settings.domain+"/submit"
-          unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer("bjesus@gmail.com").toString('base64')
-
+          unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer(subscribers[i].email).toString('base64')
           var message = {
              text:    "HTML content", 
              from:    "מרבד הקסמים <noreply@"+settings.domain+">", 
@@ -312,13 +311,13 @@ server.post('/', function(req,res){
       io.sockets.emit('server_message', ride.values);
 
       submit = "http://"+settings.domain+"/submit"
-      unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer("bjesus@gmail.com").toString('base64')
       day = {"0": "היום", "1": "מחר", "2": "מחרתיים", "3": "אחרתיים"}
       time = ride.time.getDate()+"/"+(ride.time.getMonth()+1)+" "+ride.time.getHours()+':'+(ride.time.getMinutes()<10?'0':'') + ride.time.getMinutes();
 
       Subscriber.findAll({ where: {freq: 'post'}}).ok(function(subscribers) {
         for (var i=0;i<subscribers.length;i++)
         {
+          unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer(subscribers[i].email).toString('base64')
           smtpserver.send({
              text:    "פרסום חדש במרבד!\n\nמאת: "+
                       ride.name +
