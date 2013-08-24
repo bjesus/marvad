@@ -3,7 +3,8 @@ var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
     , port = (process.env.PORT || 2234)
-    , settings = require('./settings');
+    , settings = require('./settings')
+    , request = require('request');
 
 //Setup Express
 var server = express.createServer();
@@ -15,15 +16,6 @@ server.configure(function(){
     server.use(express.session({ secret: "udm3x09242x*marvad"}));
     server.use(connect.static(__dirname + '/static'));
     server.use(server.router);
-});
-
-var email   = require("emailjs/email");
-var smtpserver  = email.server.connect({
-   user:    settings.smtp.user, 
-   password:settings.smtp.password, 
-   host:    settings.smtp.server, 
-//   port:    settings.smtp.port,
-   ssl:     true
 });
 
 
@@ -44,26 +36,36 @@ new cronJob('00 30 21 * * *', function(){
         for (var i=0;i<subscribers.length;i++) {
           submit = "http://"+settings.domain+"/submit"
           unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer(subscribers[i].email).toString('base64')
-          var message = {
-             text:    "HTML content", 
-             from:    "מרבד הקסמים <marvad@"+settings.domain+">", 
-             to:      subscribers[i].email,
-             subject: "נסיעות עתידיות במרבד",
-             attachment: 
-             [
-                {data: '<html><div dir="rtl" style="direction: rtl; text-align: right;">' +
-                  '<h1>נסיעות קסומות במרבד</h1>' +
-                  html_data +
-                  '<br/>דואר זה נשלח אליכם על כנפיו של <a href="http://'+settings.domain+
-                  '">מרבד הקסמים</a>.<br/>נוסעים לאנשהו? <a href="'+submit+
-                  '">פרסמו גם אתם וספרד דה לאב!</a><br/><br/>--<br/>להפסיק לקבל התראות? <a href="'+unsubscribe+
-                  '">לחצו כאן</a>' +
-                  '</div></html>', alternative:true}
-             ]
-          };
-
-          // send the message and get a callback with an error or details of the message that was sent
-          smtpserver.send(message, function(err, message) { console.log(err || message); });
+          var message = { 
+                          "key": settings.mandrill_key,
+                          "message": {
+                            "html": '<html><div dir="rtl" style="direction: rtl; text-align: right;">' +
+                                      '<h1>נסיעות קסומות במרבד</h1>' +
+                                      html_data +
+                                      '<br/>דואר זה נשלח אליכם על כנפיו של <a href="http://'+settings.domain+
+                                      '">מרבד הקסמים</a>.<br/>נוסעים לאנשהו? <a href="'+submit+
+                                      '">פרסמו גם אתם וספרד דה לאב!</a><br/><br/>--<br/>להפסיק לקבל התראות? <a href="'+unsubscribe+
+                                      '">לחצו כאן</a>' +
+                                      '</div></html>',
+                            "subject": "נסיעות עתידיות במרבד",
+                            "from_email": "no_reply@"+settings.domain,
+                            "from_name": "מרבד הקסמים",
+                            "to": [ {"email": subscribers[i].email} ],
+                            "headers": { "Reply-To": "bjesus@gmail.com" },
+                            "tags": ['daily']
+                          }
+                        }
+          // Send message
+          request({
+            method: "POST",
+            uri: 'https://mandrillapp.com/api/1.0/messages/send.json',
+            json: message
+          }  , function (error, response, body) {
+            if(response.statusCode != 200){
+              console.log('error: '+ response.statusCode)
+              console.log(body)
+            }
+          });
         };
       });
     };
@@ -212,13 +214,9 @@ server.post('/login', function(req,res) {
 
 server.get('/', function(req,res){
   if ( req.cookies.pass !== settings.cookie.pass ){
-    res.redirect('/login');
+   res.redirect('/login');
   }
-  //Subscriber.findAll().ok(function(subs) {
-  //  for (var i=0;i<subs.length;i++) {
-  //     console.log(subs[i].email);
-  //  }
-  //});
+
   Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATETIME('now', '-2 hours', 'localtime') AND time < DATE('now', '+1 days', 'localtime')"]}).ok(function(today_items) {
     Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+1 days', 'localtime') AND time < DATE('now', '+2 days', 'localtime')"]}).ok(function(tomorrow_items) {
       Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+2 days', 'localtime') AND time < DATE('now', '+3 days', 'localtime')"]}).ok(function(tomorrowow_items) {
@@ -323,22 +321,41 @@ server.post('/', function(req,res){
       Subscriber.findAll({ where: {freq: 'post'}}).ok(function(subscribers) {
         for (var i=0;i<subscribers.length;i++)
         {
-          console.log('wants to send email to this:');
-          console.log(subscribers[i].email);
+
+          submit = "http://"+settings.domain+"/submit"
           unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer(subscribers[i].email).toString('base64')
-          smtpserver.send({
-             text:    "פרסום חדש במרבד!\n\nמאת: "+
-                      ride.name +
-                      "\nמועד: " + day[req.body.daysfromnow] + " " + time +
-                      "\nתוכן: " + ride.content +
-                      "\nטלפון: " + ride.phone +
-                      "\n\nדואר זה נשלח אליכם על כנפיו של מרבד הקסמים.\nhttp://"+settings.domain+
-                      "\n\nנוסעים לאנשהו? פרסמו גם אתם וספרד דה לאב!\n"+submit+
-                      "\n\n--\nלהפסיק לקבל התראות? לחצו כאן: \n "+unsubscribe, 
-             from:    "מרבד הקסמים <marvad@"+settings.domain+">", 
-             to:      subscribers[i].email,
-             subject: "נסיעה: " + day[req.body.daysfromnow] + " " + time + " - " + ride.content
-          }, function(err, message) { console.log(err || message); });
+          var message = { 
+                          "key": settings.mandrill_key,
+                          "message": {
+                            "html": '<html><div dir="rtl" style="direction: rtl; text-align: right;">'+
+                              '<h1>פרסום חדש במרבד!</h1><br/>'+
+                              '<strong>מאת:</strong> '+ride.name + '<br/>' +
+                              "<strong>מועד:</strong> " + day[req.body.daysfromnow] + " " + time + '<br/>' +
+                              "<strong>תוכן:</strong> " + ride.content + '<br/>' +
+                              "<strong>טלפון:</strong> " + ride.phone + '<br/>' +
+                              '<p>דואר זה נשלח אליכם על כנפיו של <a href="http://'+settings.domain+'">מרבד הקסמים</a>.</p>'+
+                              '<p>נוסעים לאנשהו? <a href="'+submit+'">פרסמו גם אתם וספרד דה לאב</a>!</p><hr/>'+
+                              '<p><small>להפסיק לקבל התראות? <a href="'+unsubscribe+'">לחצו כאן</a></small></p></div></html>', 
+                            "subject": "נסיעה: " + day[req.body.daysfromnow] + " " + time + " - " + ride.content,
+                            "from_email": "no_reply@"+settings.domain,
+                            "from_name": "מרבד הקסמים",
+                            "to": [ {"email": subscribers[i].email} ],
+                            "headers": { "Reply-To": "bjesus@gmail.com" },
+                            "tags": ['post']
+                          }
+                        }
+          // Send message
+          request({
+            method: "POST",
+            uri: 'https://mandrillapp.com/api/1.0/messages/send.json',
+            json: message
+          }  , function (error, response, body) {
+            if(response.statusCode != 200){
+              console.log('error: '+ response.statusCode)
+              console.log(body)
+            }
+          });
+
         }
       });
       
