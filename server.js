@@ -22,6 +22,7 @@ var smtpserver  = email.server.connect({
    user:    settings.smtp.user, 
    password:settings.smtp.password, 
    host:    settings.smtp.server, 
+//   port:    settings.smtp.port,
    ssl:     true
 });
 
@@ -45,7 +46,7 @@ new cronJob('00 30 21 * * *', function(){
           unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer(subscribers[i].email).toString('base64')
           var message = {
              text:    "HTML content", 
-             from:    "מרבד הקסמים <noreply@"+settings.domain+">", 
+             from:    "מרבד הקסמים <marvad@"+settings.domain+">", 
              to:      subscribers[i].email,
              subject: "נסיעות עתידיות במרבד",
              attachment: 
@@ -213,7 +214,11 @@ server.get('/', function(req,res){
   if ( req.cookies.pass !== settings.cookie.pass ){
     res.redirect('/login');
   }
-  Subscriber.findAll().ok(function(subs) { console.log(subs) });
+  //Subscriber.findAll().ok(function(subs) {
+  //  for (var i=0;i<subs.length;i++) {
+  //     console.log(subs[i].email);
+  //  }
+  //});
   Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATETIME('now', '-2 hours', 'localtime') AND time < DATE('now', '+1 days', 'localtime')"]}).ok(function(today_items) {
     Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+1 days', 'localtime') AND time < DATE('now', '+2 days', 'localtime')"]}).ok(function(tomorrow_items) {
       Item.findAll({order: 'time ASC', offset: 0, where: ["kind == 'ride' AND time >= DATE('now', '+2 days', 'localtime') AND time < DATE('now', '+3 days', 'localtime')"]}).ok(function(tomorrowow_items) {
@@ -285,6 +290,7 @@ server.get('/submit', function(req,res){
 });
 
 server.post('/', function(req,res){
+  console.log('new post request, lets see if itll work');
   current = new Date()
   rideTime = new Date(current.getFullYear(),
               current.getMonth(),
@@ -313,20 +319,23 @@ server.post('/', function(req,res){
       submit = "http://"+settings.domain+"/submit"
       day = {"0": "היום", "1": "מחר", "2": "מחרתיים", "3": "אחרתיים"}
       time = ride.time.getDate()+"/"+(ride.time.getMonth()+1)+" "+ride.time.getHours()+':'+(ride.time.getMinutes()<10?'0':'') + ride.time.getMinutes();
-
+      console.log('someone posted something! lets see whats going on');
       Subscriber.findAll({ where: {freq: 'post'}}).ok(function(subscribers) {
         for (var i=0;i<subscribers.length;i++)
         {
+          console.log('wants to send email to this:');
+          console.log(subscribers[i].email);
           unsubscribe = "http://"+settings.domain+"/remove_email?id="+new Buffer(subscribers[i].email).toString('base64')
           smtpserver.send({
              text:    "פרסום חדש במרבד!\n\nמאת: "+
                       ride.name +
                       "\nמועד: " + day[req.body.daysfromnow] + " " + time +
                       "\nתוכן: " + ride.content +
+                      "\nטלפון: " + ride.phone +
                       "\n\nדואר זה נשלח אליכם על כנפיו של מרבד הקסמים.\nhttp://"+settings.domain+
                       "\n\nנוסעים לאנשהו? פרסמו גם אתם וספרד דה לאב!\n"+submit+
                       "\n\n--\nלהפסיק לקבל התראות? לחצו כאן: \n "+unsubscribe, 
-             from:    "מרבד הקסמים <noreply@"+settings.domain+">", 
+             from:    "מרבד הקסמים <marvad@"+settings.domain+">", 
              to:      subscribers[i].email,
              subject: "נסיעה: " + day[req.body.daysfromnow] + " " + time + " - " + ride.content
           }, function(err, message) { console.log(err || message); });
